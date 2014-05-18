@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item>
+        <shape>
+            <gradient
+                android:angle="90"
+                android:endColor="@color/gallery_tab_bottom_border"
+                android:startColor="@color/gallery_tab_background"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- This is the line -->
+    <item
+        android:bottom="2px">
+        <shape>
+            <solid android:color="@color/gallery_tab_background" />
+        </shape>
+    </item>
+
+</layer-list>

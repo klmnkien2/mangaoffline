@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="full_transparent">#00000000</color>
+    <color name="color_preloader_center">#47639e</color>
+    <color name="color_preloader_end">#cccccc</color>
+    <color name="color_preloader_start">#cccccc</color>
+    <color name="color_page_background">#EBF5FF</color>
+    <color name="color_title_backgound">#60000000</color>
+    <color name="color_navigator">#FFFFFF</color>
+    
+    <color name="gallery_background">#e9eaed</color>
+    <color name="listview_background">#D6EAEE</color>
+    <color name="chapter_read_color">#993366</color>
+    
+    <color name="gallery_item_bg">#FFFFFF</color>
+    <color name="gallery_item_border">#cccccc</color>
+    <color name="gallery_tab_background">#47639e</color>
+    <color name="gallery_tab_indicator">#FFFFFF</color>
+    <color name="gallery_tab_divider">#FFFFFF</color>
+    <color name="gallery_tab_bottom_border">#CCCCCC</color>
+</resources>
