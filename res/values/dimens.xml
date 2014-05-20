@@ -15,7 +15,10 @@
     <dimen name="list_name_text_size">15dip</dimen>
     <dimen name="list_sub_text_size">13dip</dimen>
     <dimen name="list_sub_text_size_small">10dip</dimen>
-    <dimen name="search_input_text_size">14dip</dimen>
+    
+    <dimen name="small_text_size">8dip</dimen>
+    <dimen name="link_collapse_text_size">12dip</dimen>
+    <dimen name="link_collapse_text_margin">9dip</dimen> <!-- size / 2 + margin -->
     
     <dimen name="sliding_tab_height">55dip</dimen>
 </resources>

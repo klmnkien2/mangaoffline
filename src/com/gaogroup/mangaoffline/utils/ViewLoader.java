@@ -19,15 +19,17 @@ import android.util.Log;
 
 public class ViewLoader
 {    
-    public static String BASE_URL = "http://www.mangareader.net";
+    public static String BASE_URL = "http://www.mangaeden.com";
 
     private ViewChangeListener listener;
     private int mTotal;
+    private int mCount;
 
     public ViewLoader(ViewChangeListener listener)
     {
         this.listener = listener;
-        mTotal = 0;
+        this.mTotal = 0;
+        this.mCount = 0;
     }
     
     public void execute(String url) {
@@ -53,18 +55,16 @@ public class ViewLoader
     
     private Document doc;
     private Elements elements;
-    private Element content;
     private Iterator<Element> mIterator;
     
     public void parseHtml(String html) {
         doc = Jsoup.parse(html);
-        content = doc.select("#pageMenu").get(0);
-        elements = content.select("option");
+        elements = doc.select(".pagination > a");
     }
 
     public void getMoreViewItem()
     {
-        mTotal = elements.size();
+        mTotal = elements.size() - 2;
         mIterator = elements.iterator();
         parseImageUrl();
     }
@@ -72,6 +72,8 @@ public class ViewLoader
     public void parseImageUrl() {
         if(mIterator.hasNext())
         {
+        	if(this.mCount == 0 || this.mCount == mTotal) return;
+        	
             Element e = mIterator.next();
             
             String sourceUrl = e.attr("value");      
@@ -82,10 +84,10 @@ public class ViewLoader
                 public void onResponse(String response) {
                     try {
                         Document doc = Jsoup.parse(response);
-                        Element element = doc.select("img#img").get(0);        
+                        Element element = doc.select("img#mainImg").get(0);        
                         String imageUrl = element.attr("src");
 
-                        listener.onViewLoaded(new ViewItem(imageUrl), mTotal + (int)(Math.random() * 100));
+                        listener.onViewLoaded(new ViewItem(imageUrl), mTotal);
                         parseImageUrl();
                     } catch(Exception e) {
                         Log.e("oh yeah", "volley response");  
@@ -102,6 +104,7 @@ public class ViewLoader
 
             // Adding request to request queue
             AppController.getInstance().addToRequestQueue(strReq, "req_view_item");
+            this.mCount ++;
         } else {
             listener.onViewFinished();
         }

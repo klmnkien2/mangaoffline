@@ -13,14 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class ChapterAdapter extends BaseAdapter {
 
 	private Context mContext;
-	private boolean isLoading = false;
 	private LayoutInflater infalter;
 	private ArrayList<ChapterInfo> items = new ArrayList<ChapterInfo>();
 
@@ -56,6 +54,12 @@ public class ChapterAdapter extends BaseAdapter {
 
 		notifyDataSetChanged();
 	}
+	
+	public void addItem(ChapterInfo add) {
+            
+        this.items.add(add);
+
+    }
 
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -66,33 +70,31 @@ public class ChapterAdapter extends BaseAdapter {
             convertView = infalter.inflate(R.layout.chapter_list_item, null);
 
             holder = new ViewHolder();
+            holder.button = (Button) convertView.findViewById(R.id.buttonView);
             holder.name = (TextView) convertView.findViewById(R.id.textView);
             holder.sub = (TextView) convertView.findViewById(R.id.subTextView);
             
-            holder.realItem = (LinearLayout) convertView.findViewById(R.id.realItem);
-            holder.progressItem = (LinearLayout) convertView.findViewById(R.id.progressItem);
-
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
-        
-        if(position == items.size()-1 && this.isLoading) {
-            holder.realItem.setVisibility(View.GONE);
-            holder.progressItem.setVisibility(View.VISIBLE);
-        } else {
-            holder.realItem.setVisibility(View.VISIBLE);
-            holder.progressItem.setVisibility(View.GONE);
+          
+        holder.button.setOnClickListener(new View.OnClickListener() {
             
-            holder.name.setText(items.get(position).getTitle());
-            holder.sub.setText(items.get(position).getSub());
-
-            if(items.get(position).getIsRead() == 1) {
-                holder.name.setTypeface(null, Typeface.ITALIC);
-                holder.sub.setTypeface(null, Typeface.ITALIC);
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                
             }
-           
-            convertView.setOnClickListener(new OnItemClickListener(items.get(position).getChapterUrl()));
+        });
+        holder.name.setText(items.get(position).getTitle());
+        holder.sub.setText(items.get(position).getSub());
+
+        if(items.get(position).getIsRead() == 1) {
+            holder.name.setTypeface(null, Typeface.ITALIC);
+            holder.sub.setTypeface(null, Typeface.ITALIC);
         }
+       
+        convertView.setOnClickListener(new OnItemClickListener(items.get(position).getChapterUrl()));        
         
 		return convertView;        
 	}
@@ -112,30 +114,11 @@ public class ChapterAdapter extends BaseAdapter {
             mContext.startActivity(i); 
         }
     }
-    
-    public boolean isLoading() {
-        return isLoading;
-    }
-    
-    public void enableLoading() {
-        this.items.add(new ChapterInfo(null, null, null, null, -1, -1));
-        this.isLoading = true;
-        notifyDataSetChanged();
-    }
-
-    public void disableLoading() {
-        this.isLoading = false;
-        this.items.remove(items.size()-1);
-        notifyDataSetChanged();
-    }
 
     public static class ViewHolder {
         public TextView name;
         public TextView sub;
-        public ImageView image;
-        
-        public LinearLayout realItem;
-        public LinearLayout progressItem;
+        public Button button;
     }
 
 	public void clear() {

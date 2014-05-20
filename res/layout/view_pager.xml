@@ -22,7 +22,7 @@
 
     <TextView
         android:id="@+id/_viewNote"
-        android:text="Share with your friend now!"
+        android:text="@string/view_note"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="1dip"

@@ -7,7 +7,7 @@ import com.crittercism.app.Crittercism;
 import com.gaogroup.mangaoffline.R;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 import com.gaogroup.mangaoffline.model.MangaInfo;
-import com.gaogroup.mangaoffline.utils.NetworkController;
+import com.gaogroup.mangaoffline.utils.ChapterLoader;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -30,12 +30,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MangaActivity extends ActionBarActivity implements NetworkController.NetworkChangeListener {
+public class MangaActivity extends ActionBarActivity {
     
     private MangaInfo mangaInfo;
     private ListView listView;
-    private ChapterAdapter listAdapter;    
-    private NetworkController mNetworkController;
+    private ChapterAdapter listAdapter;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,6 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
         
         mangaInfo = AppController.getManga();
         
-        mNetworkController = new NetworkController(this);
         initImageLoader();        
         admob();
         
@@ -74,7 +72,24 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
         
         //Load image data
         image.setImageResource(R.color.full_transparent);
-        imageLoader.displayImage(mangaInfo.getImageUrl(), image);        
+        imageLoader.displayImage(mangaInfo.getImageUrl(), image);     
+        
+        //collapse - expand
+        findViewById(R.id.link_collapse).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				collapseOrExpand();				
+			}
+		});
+        
+        findViewById(R.id.item_infomation).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				collapseOrExpand();				
+			}
+		});
     }
     
     public void setupListChapters() {
@@ -87,7 +102,7 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
     public void getChapterData() {
         List<ChapterInfo> lst = AppController.getInstance().getDBHelper().getAllChapters();
         if(lst.isEmpty()) {
-            mNetworkController.getChapterList(mangaInfo.getMangaUrl());
+            getChapterList(mangaInfo.getMangaUrl());
         } else {
             List<ChapterInfo> lstChapter = new ArrayList<ChapterInfo>();
             for (ChapterInfo info : lst) {
@@ -118,7 +133,7 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
             @Override
             public void onClick(View v) {
                 listAdapter.clear();
-                mNetworkController.getChapterList(mangaInfo.getMangaUrl());
+                getChapterList(mangaInfo.getMangaUrl());
             }
         });
     }
@@ -145,6 +160,21 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
         ImageLoaderConfiguration config = builder.build();
         imageLoader = ImageLoader.getInstance();
         imageLoader.init(config);
+    }
+    
+    public void collapseOrExpand() {
+    	TextView link = (TextView) findViewById(R.id.link_collapse);
+    	String tag = (String)link.getTag();    	
+    	TextView description = (TextView) findViewById(R.id.description_info);
+    	if(tag.equals("expand")) {
+    		description.setVisibility(View.GONE);
+    		link.setTag("collapse");
+    		link.setText("Click to Expand");
+    	} else {
+    		description.setVisibility(View.VISIBLE);
+    		link.setTag("expand");
+    		link.setText("Click to Collapse");
+    	}
     }
     
     /*
@@ -198,27 +228,24 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
         adView.loadAd(adRequest);
     }
     
-    @Override
-    public void onPreLoading() {
+    public void loadChapter(ChapterInfo item) {        
+        listAdapter.addItem(item);        
+    }
+    
+    public void updateProgressBar(int value) {
+        dialog.setProgress(value);
+    }
+    
+    public void finishLoading() {
+        listAdapter.notifyDataSetChanged();
+        closeProgressDialog();
+    }
+    
+    public void getChapterList(String url)
+    {
+        listAdapter.clear();
         showProgressDialog();
-    }
-    
-    @Override
-    public void onLoadedManga(List<MangaInfo> items, String paginator) {
-     
-    }
-    
-    @Override
-    public void onLoadedChapter(List<ChapterInfo> items, String paginator) {
-        
-        listAdapter.addAll(items);
-        closeProgressDialog();
-    }
-
-    @Override
-    public void onLoadedFail(Exception ex) {
-//        ex.printStackTrace();
-        closeProgressDialog();
+        new ChapterLoader(this).execute(url);
     }
     
     /*
@@ -227,9 +254,18 @@ public class MangaActivity extends ActionBarActivity implements NetworkControlle
     private ProgressDialog dialog;
     
     public void setupProgressDialog() {
-        dialog = new ProgressDialog(this);
-        dialog.setMessage("Loading ...");
-        dialog.setCancelable(false);
+    	dialog = new ProgressDialog(this);
+    	dialog.setTitle("In progress...");
+		dialog.setMessage("Loading...");
+		dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		dialog.setIndeterminate(false);   
+		dialog.setMax(100);
+//		dialog.setIcon(R.drawable.arrow_stop_down);
+		dialog.setCancelable(true);
+    }
+    
+    public void updateProgress(int percent) {
+    	dialog.setProgress(percent);
     }
     
     public void showProgressDialog() {

@@ -14,7 +14,8 @@ import android.content.Context;
  */
 public final class FileUtils {
 
-	private static final int BUFFER_SIZE = 8 * 1024; // 8 KB 
+	private static final int BUFFER_SIZE = 8 * 1024; // 8 KB
+	private static final String SAVE_FOLDER = "MangaOffline";
 
 	private FileUtils() {
 	}
@@ -30,7 +31,7 @@ public final class FileUtils {
 	    File cacheDir;
 	    
         if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
-            cacheDir = new File(android.os.Environment.getExternalStorageDirectory(),"9gagsFree");
+            cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), SAVE_FOLDER);
         else
             cacheDir = context.getCacheDir();
         if(!cacheDir.exists())

@@ -27,7 +27,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,7 +56,6 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         addAds();     
         
-        setupScreenDimension();
         initImageLoader();
         setupViewPager();
         mViewController = new ViewController(this);
@@ -133,17 +131,6 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         ImageLoaderConfiguration config = builder.build();
         imageLoader = ImageLoader.getInstance();
         if(!imageLoader.isInited()) imageLoader.init(config);
-    }
-    
-    public float SCALE_DIP = 0, SCREEN_WIDTH = 0, SCREEN_HEIGHT = 0;
-    public void setupScreenDimension() {
-        if(SCREEN_WIDTH == 0) { 
-            DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            SCALE_DIP = metrics.density;
-            SCREEN_WIDTH = metrics.widthPixels;
-            SCREEN_HEIGHT = metrics.heightPixels;
-        }
     }
 
     public void refesh() {

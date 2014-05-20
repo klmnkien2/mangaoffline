@@ -1,8 +1,6 @@
 package com.gaogroup.mangaoffline.utils;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,24 +12,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.Request.Method;
 import com.android.volley.toolbox.StringRequest;
 import com.gaogroup.mangaoffline.AppController;
+import com.gaogroup.mangaoffline.MangaActivity;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
-import com.gaogroup.mangaoffline.utils.NetworkController.NetworkChangeListener;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class ChapterLoader extends AsyncTask<String, Integer, Void>
 {    
-    private static int PRE_LOADING = 1;
-    private static int SUCCESS_STATUS = 2;
-    private static int ERROR_STATUS = 3;
     public static String BASE_URL = "http://www.mangaeden.com";
 
-    private NetworkChangeListener listener;
-    private List<ChapterInfo> items = new ArrayList<ChapterInfo>();
+    private MangaActivity listener;
     private String mangaUrl;
 
-    public ChapterLoader(NetworkChangeListener listener)
+    public ChapterLoader(MangaActivity listener)
     {
         this.listener = listener;        
     }
@@ -41,13 +35,13 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
     {
         try
         {
-            publishProgress(PRE_LOADING);
             this.mangaUrl = params[0];
             executeVolley(params[0]);
         }
         catch(Exception ex)
-        {     
-            publishProgress(ERROR_STATUS);            
+        {   
+            listener.closeProgressDialog();
+        	Log.e("chapterloader", "Error to connect network!");        
         }
 
         return null;
@@ -56,18 +50,8 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
     @Override
     protected void onProgressUpdate(Integer... values)
     {
-        if(values[0].intValue() == PRE_LOADING)
-        {
-            listener.onPreLoading();
-        }
-        else if(values[0].intValue() == SUCCESS_STATUS)
-        {
-            listener.onLoadedChapter(items, null);
-        } 
-        else if(values[0].intValue() == ERROR_STATUS)
-        {
-            listener.onLoadedFail(new Exception("Error to connect network!"));
-        }
+        Log.e("1", "" + values[0].intValue());      
+    	listener.updateProgressBar(values[0].intValue());
     }
     
     public void executeVolley(String url) {
@@ -79,21 +63,22 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
                 @Override
                 public void onResponse(String response) {
                     parseHtml(response);
-                    items = getMoreItem();
-                    publishProgress(SUCCESS_STATUS); 
+                    getMoreItem();
+                    listener.finishLoading();
                 }
             }, new Response.ErrorListener() {
     
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    publishProgress(ERROR_STATUS);                    
+                    listener.closeProgressDialog();
+                    Log.e("chapterloader", "Error to connect network!");          
                 }
             });
     
             // Adding request to request queue
             AppController.getInstance().addToRequestQueue(strReq, "req_chapter_list");
         } else {
-            publishProgress(SUCCESS_STATUS); 
+            listener.finishLoading();
         }
     }
     
@@ -103,13 +88,13 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
     
     public void parseHtml(String html) {
         doc = Jsoup.parse(html);
-        content = doc.select("#leftContent > table > tbody").get(0);        
+        content = doc.select("#leftContent > table > tbody").get(0);      
+//        Log.e("chapterloader", content.html());     
         elements = content.select("tr");
     }
     
-    public List<ChapterInfo> getMoreItem()
+    public void getMoreItem()
     {
-        ArrayList<ChapterInfo> items = new ArrayList<ChapterInfo>();
         Iterator<Element> i = elements.iterator();
 
         int number = 0;
@@ -125,12 +110,13 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
                 if(existInfo == null) AppController.getInstance().getDBHelper().createChapter(item);
                 else item = existInfo;
                 
-                items.add(item); 
+                listener.loadChapter(item); 
+                Log.e("0", "" + (int) (number * 100 / elements.size()));     
+                publishProgress((int) (number * 100 / elements.size()));
                 number ++;
             }
         }
 
-        return items;
     }
 
     private ChapterInfo getItem(Element e)
