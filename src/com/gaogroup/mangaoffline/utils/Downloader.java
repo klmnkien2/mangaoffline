@@ -17,18 +17,10 @@ import android.util.Log;
 
 public class Downloader extends AsyncTask<String, Void, Integer> {
 
-    ProgressDialog dialog;
     Context mContext;
 
     public Downloader(Context mContext) {
         this.mContext = mContext;
-    }
-
-    protected void onPreExecute() {
-        dialog = new ProgressDialog(mContext);
-        dialog.setMessage("Downloading ...");
-        dialog.setCancelable(false);
-        dialog.show();
     }
 
     protected Integer doInBackground(String... strings) {
@@ -65,16 +57,5 @@ public class Downloader extends AsyncTask<String, Void, Integer> {
         return 0;
     }
 
-    protected void onPostExecute(Integer result) {
-        if (dialog!=null) {
-            if (dialog.isShowing()) {
-                dialog.dismiss();       
-            }
-        }        
-
-        if (result < 0) {
-            
-        }
-    }
 }
 

@@ -77,13 +77,13 @@ public class ChapterAdapter extends BaseAdapter {
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
-          
+        
+        final int pos = position;
         holder.button.setOnClickListener(new View.OnClickListener() {
             
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                
+                ((MangaActivity)mContext).downloadChapter(items.get(pos).getChapterUrl());
             }
         });
         holder.name.setText(items.get(position).getTitle());

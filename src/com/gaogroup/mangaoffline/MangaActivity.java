@@ -248,6 +248,12 @@ public class MangaActivity extends ActionBarActivity {
         new ChapterLoader(this).execute(url);
     }
     
+    public void downloadChapter(String url)
+    {
+        listAdapter.clear();
+        showProgressDialog();
+    }
+    
     /*
      * Setup a progresDialog
      */
