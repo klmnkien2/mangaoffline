@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import com.gaogroup.mangaoffline.AppController;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
+import com.gaogroup.mangaoffline.model.ViewItem;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -25,6 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	// Table Names
 	private static final String TABLE_CHAPTER = "chapters";
+	private static final String TABLE_PAGE = "pages";
 
 	// Common column names
 	private static final String KEY_ID = "id";
@@ -41,6 +43,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + "number  INTEGER,"
             + KEY_CREATED_AT + " DATETIME" + ")";
 	
+	private static final String CREATE_TABLE_PAGE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_PAGE + "(" + KEY_ID + " INTEGER PRIMARY KEY,"
+            + "chapterUrl  TEXT,"
+            + "imageUrl  TEXT,"
+            + "fileUrl  TEXT,"
+            + "stt  INTEGER" + ")";
+	
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -49,12 +58,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		// creating required tables
 		db.execSQL(CREATE_TABLE_CHAPTER);
+		db.execSQL(CREATE_TABLE_PAGE);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// on upgrade drop older tables
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAPTER);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_PAGE);
 
 		// create new tables
 		onCreate(db);
@@ -186,6 +197,85 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while(cursor.moveToNext());           
         }
         return id;
+    }
+    
+    public long createPage(ViewItem item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("chapterUrl", item.getChapterUrl());
+        values.put("imageUrl", item.getImageUrl());
+        values.put("fileUrl", item.getFileUrl());
+        values.put("stt", item.getOrder());
+
+        // insert row
+        long inserted_id = db.insert(TABLE_PAGE, null, values);
+
+        return inserted_id;
+    }
+    
+    public int updatePage(ViewItem item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("chapterUrl", item.getChapterUrl());
+        values.put("imageUrl", item.getImageUrl());
+        values.put("fileUrl", item.getFileUrl());
+        values.put("stt", item.getOrder());
+        
+        // updating row
+        return db.update(TABLE_PAGE, values, "chapterUrl = ?",
+                new String[] { item.getChapterUrl() });
+    }
+    
+    public ViewItem getPage(String imageUrl) {
+        try {
+            String selectQuery = "SELECT  * FROM " + TABLE_PAGE + " r  " +
+                    "WHERE r.imageUrl = '" + imageUrl + "'";
+
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor c = db.rawQuery(selectQuery, null);
+
+            if (c.moveToFirst()) {
+
+                ViewItem item = new ViewItem(c.getString(c.getColumnIndex("imageUrl")));
+                item.setChapterUrl(c.getString(c.getColumnIndex("chapterUrl")));
+                item.setFileUrl(c.getString(c.getColumnIndex("fileUrl")));
+                item.setOrder(c.getInt(c.getColumnIndex("stt")));
+
+                return item;
+            }
+            c.close();
+        }catch(Exception e) {
+            
+        }
+        return null;
+    }
+    
+    public List<ViewItem> getPageInChapter(String chapterUrl) {
+    	List<ViewItem> list = new ArrayList<ViewItem>();
+        try {
+            String selectQuery = "SELECT  * FROM " + TABLE_PAGE + " r  " +
+                    "WHERE r.chapterUrl = '" + chapterUrl + "'";
+
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor c = db.rawQuery(selectQuery, null);
+
+            if (c.moveToFirst()) {
+            	do {
+            		ViewItem item = new ViewItem(c.getString(c.getColumnIndex("imageUrl")));
+                	item.setChapterUrl(c.getString(c.getColumnIndex("chapterUrl")));
+                	item.setFileUrl(c.getString(c.getColumnIndex("fileUrl")));
+                	item.setOrder(c.getInt(c.getColumnIndex("stt")));
+                    
+                    list.add(item);
+                } while (c.moveToNext());
+            }
+            c.close();
+        }catch(Exception e) {
+            
+        }
+        return list;
     }
 	
 	public void deleteChapter(String mangaUrl) {

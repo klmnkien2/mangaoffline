@@ -1,6 +1,7 @@
 package com.gaogroup.mangaoffline;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.crittercism.app.Crittercism;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
@@ -136,7 +137,16 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
     public void refesh() {
         getSupportActionBar().setTitle("Chapter " + (current_chapter.getNumber() + 1));
         mViewPagerAdapter.resetItems();
-        mViewController.getViewLinks(current_chapter.getChapterUrl());
+        
+        List<ViewItem> lst = dbHelper.getPageInChapter(current_chapter.getChapterUrl());
+        if(lst.isEmpty()) {
+        	mViewController.getViewLinks(current_chapter.getChapterUrl());
+        } else {            
+            mViewPagerAdapter.addLoadingOnly();
+            mViewPagerAdapter.addMoreItems(lst, lst.size());
+            mViewPagerAdapter.finishLoading();
+        }
+        
     }
     
     public void prev() {
@@ -179,7 +189,7 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
             notifyDataSetChanged();
         }
         
-        public void addMoreItems(ArrayList<ViewItem> moreItems, int total) {
+        public void addMoreItems(List<ViewItem> moreItems, int total) {
             removeLoadingOnly();
             
             this.mTotal = total;
@@ -391,6 +401,11 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         mViewPagerAdapter.addMoreItem(viewItems, total);
         if(current_chapter != null) {
             dbHelper.readChapter(current_chapter);
+        }
+        
+        ViewItem exist = AppController.getInstance().getDBHelper().getPage(viewItems.getImageUrl());
+        if(exist == null) {
+            AppController.getInstance().getDBHelper().createPage(viewItems);
         }
         
         mViewPagerAdapter.addLoadingOnly();

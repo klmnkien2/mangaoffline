@@ -22,6 +22,7 @@ public class ViewLoader
     public static String BASE_URL = "http://www.mangaeden.com";
 
     private ViewChangeListener listener;
+    private String chapterUrl;
     private int mTotal;
     private int mCount;
 
@@ -31,9 +32,10 @@ public class ViewLoader
         this.mTotal = 0;
         this.mCount = 0;
     }
-    
+
     public void execute(String url) {
         listener.onViewPreLoading();
+        chapterUrl = url;
         StringRequest strReq = new StringRequest(Method.GET, url, new Response.Listener<String>() {
 
             @Override
@@ -52,11 +54,11 @@ public class ViewLoader
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, "req_view_content");
     }
-    
+
     private Document doc;
     private Elements elements;
     private Iterator<Element> mIterator;
-    
+
     public void parseHtml(String html) {
         doc = Jsoup.parse(html);
         elements = doc.select(".pagination > a");
@@ -68,48 +70,63 @@ public class ViewLoader
         mIterator = elements.iterator();
         parseImageUrl();
     }
-    
+
     public void parseImageUrl() {
         if(mIterator.hasNext())
         {
-        	if(this.mCount == 0 || this.mCount == mTotal) return;
-        	
+
             Element e = mIterator.next();
-            
-            String sourceUrl = e.attr("value");      
-            
-            StringRequest strReq = new StringRequest(Method.GET, BASE_URL + sourceUrl, new Response.Listener<String>() {
-
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        Document doc = Jsoup.parse(response);
-                        Element element = doc.select("img#mainImg").get(0);        
-                        String imageUrl = element.attr("src");
-
-                        listener.onViewLoaded(new ViewItem(imageUrl), mTotal);
-                        parseImageUrl();
-                    } catch(Exception e) {
-                        Log.e("oh yeah", "volley response");  
-                    }
-                }
-            }, new Response.ErrorListener() {
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    parseImageUrl();
-                    Log.e("Oh yeah", "volley request error");  
-                }
-            });
-
-            // Adding request to request queue
-            AppController.getInstance().addToRequestQueue(strReq, "req_view_item");
             this.mCount ++;
+
+            if(this.mCount > 1 && this.mCount < elements.size() - 1) {
+                
+                String sourceUrl = BASE_URL + e.attr("href");   
+                if(this.mCount == 2) sourceUrl = chapterUrl;
+
+                StringRequest strReq = new StringRequest(Method.GET,  sourceUrl, new Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            Document doc = Jsoup.parse(response);
+                            Element element = doc.select("img#mainImg").get(0);        
+                            String imageUrl = element.attr("src");
+                            if(!imageUrl.startsWith("http:")) {
+                                imageUrl = "http:" + imageUrl;
+                            }
+
+                            ViewItem item = new ViewItem(imageUrl);
+                            item.setOrder(mCount);
+                            item.setChapterUrl(chapterUrl);
+
+                            listener.onViewLoaded(item, mTotal);
+                            parseImageUrl();
+                        } catch(Exception e) {
+                            parseImageUrl();
+                            Log.e("oh yeah", "volley response");  
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        parseImageUrl();
+                        Log.e("Oh yeah", "volley request error");  
+                    }
+                });
+
+                // Adding request to request queue
+                AppController.getInstance().addToRequestQueue(strReq, "req_view_item");
+            }
+            else {
+                parseImageUrl();
+            }
+            
         } else {
             listener.onViewFinished();
         }
     }
-    
+
     public String getThumbName(String url) {
         return url.substring(url.lastIndexOf("/") + 1);
     }

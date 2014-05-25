@@ -33,7 +33,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dip"
                 android:layout_marginLeft="15dip"
                 android:layout_marginTop="10dip"
                 android:orientation="vertical" >
@@ -95,16 +94,16 @@
                 android:textColor="#000000"
                 android:textSize="@dimen/button_text_size" />
 
-            <Button
-                android:id="@+id/button_download"
-                android:background="@drawable/btn_blue_matte"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:text="Download all"
-                android:textColor="#000000"
-                android:textSize="@dimen/button_text_size" />
+<!--             <Button -->
+<!--                 android:id="@+id/button_download" -->
+<!--                 android:background="@drawable/btn_blue_matte" -->
+<!--                 android:layout_width="0dip" -->
+<!--                 android:layout_height="wrap_content" -->
+<!--                 android:layout_gravity="center" -->
+<!--                 android:layout_weight="1" -->
+<!--                 android:text="Download all" -->
+<!--                 android:textColor="#000000" -->
+<!--                 android:textSize="@dimen/button_text_size" /> -->
         </LinearLayout>
     </LinearLayout>
 
@@ -136,9 +135,9 @@
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Click to Collapse"
+        android:text="TAP TO COLLAPSE"
         android:tag="expand"
-        android:textColor="#0F67A1"
+        android:textColor="#000000"
         android:textStyle="bold"
         android:textSize="@dimen/link_collapse_text_size" />
 

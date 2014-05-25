@@ -46,13 +46,6 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
 
         return null;
     }
-
-    @Override
-    protected void onProgressUpdate(Integer... values)
-    {
-        Log.e("1", "" + values[0].intValue());      
-    	listener.updateProgressBar(values[0].intValue());
-    }
     
     public void executeVolley(String url) {
         
@@ -111,8 +104,7 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
                 else item = existInfo;
                 
                 listener.loadChapter(item); 
-                Log.e("0", "" + (int) (number * 100 / elements.size()));     
-                publishProgress((int) (number * 100 / elements.size()));
+                listener.updateProgressBar((int) (number * 100 / elements.size()));
                 number ++;
             }
         }

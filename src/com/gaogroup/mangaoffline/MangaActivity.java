@@ -52,8 +52,9 @@ public class MangaActivity extends ActionBarActivity {
         setupMangaInfo();
         setupListChapters();
         setupButtonFunc();
-        getChapterData();
         setupProgressDialog();
+        
+        getChapterData();
     }
     
     public void setupMangaInfo() {
@@ -118,14 +119,14 @@ public class MangaActivity extends ActionBarActivity {
     }
     
     public void setupButtonFunc() {
-        Button download = (Button) findViewById(R.id.button_download);
-        download.setOnClickListener(new View.OnClickListener() {
-            
-            @Override
-            public void onClick(View v) {
-                
-            }
-        });
+//        Button download = (Button) findViewById(R.id.button_download);
+//        download.setOnClickListener(new View.OnClickListener() {
+//            
+//            @Override
+//            public void onClick(View v) {
+//                
+//            }
+//        });
         
         Button refesh = (Button) findViewById(R.id.button_refesh);
         refesh.setOnClickListener(new View.OnClickListener() {
@@ -168,12 +169,14 @@ public class MangaActivity extends ActionBarActivity {
     	TextView description = (TextView) findViewById(R.id.description_info);
     	if(tag.equals("expand")) {
     		description.setVisibility(View.GONE);
+    		findViewById(R.id.button_refesh).setVisibility(View.GONE);
     		link.setTag("collapse");
-    		link.setText("Click to Expand");
+    		link.setText("TAP TO EXPAND");
     	} else {
     		description.setVisibility(View.VISIBLE);
+    		findViewById(R.id.button_refesh).setVisibility(View.VISIBLE);
     		link.setTag("expand");
-    		link.setText("Click to Collapse");
+    		link.setText("TAP TO COLLAPSE");
     	}
     }
     
@@ -236,6 +239,10 @@ public class MangaActivity extends ActionBarActivity {
         dialog.setProgress(value);
     }
     
+    public void updateProgressMessage(String value) {
+        dialog.setMessage(value);
+    }
+    
     public void finishLoading() {
         listAdapter.notifyDataSetChanged();
         closeProgressDialog();
@@ -268,6 +275,11 @@ public class MangaActivity extends ActionBarActivity {
 		dialog.setMax(100);
 //		dialog.setIcon(R.drawable.arrow_stop_down);
 		dialog.setCancelable(true);
+    }
+    
+    public void progressReset() {
+        dialog.setMessage("Loading...");
+        dialog.setProgress(0);
     }
     
     public void updateProgress(int percent) {

@@ -18,6 +18,7 @@ public class ViewFragment extends Fragment {
 
     private String title;
     private String imageUrl;
+    private String fileUrl;
     public boolean isLoadingOnly;
     private boolean networkTrouble;
     ImageLoader mImageLoader;
@@ -31,6 +32,7 @@ public class ViewFragment extends Fragment {
         Bundle args = new Bundle();
         args.putString("title", gag.getTitle());
         args.putString("imageUrl", gag.getImageUrl());
+        args.putString("fileUrl", gag.getFileUrl());
         args.putBoolean("isLoadingOnly", gag.isLoadingOnly());
         args.putBoolean("networkTrouble", gag.isNetworkTrouble());
         fragment.setArguments(args);
@@ -45,6 +47,7 @@ public class ViewFragment extends Fragment {
         mImageLoader = ((ViewActivity)getActivity()).getImageLoader();
         title = getArguments().getString("title");
         imageUrl = getArguments().getString("imageUrl");
+        fileUrl = getArguments().getString("fileUrl");
         isLoadingOnly = getArguments().getBoolean("isLoadingOnly");
         networkTrouble = getArguments().getBoolean("networkTrouble");
     }
@@ -83,8 +86,8 @@ public class ViewFragment extends Fragment {
     }
     
     public void loadImage() {
-        
-        mImageLoader.displayImage(imageUrl, mImageView, new ImageLoadingListener() {
+        final String urlToLoad = fileUrl != null ? fileUrl : imageUrl;
+        mImageLoader.displayImage(urlToLoad, mImageView, new ImageLoadingListener() {
 
             @Override
             public void onLoadingStarted(String arg0, View arg1) {
