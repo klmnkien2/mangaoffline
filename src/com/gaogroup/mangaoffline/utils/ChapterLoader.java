@@ -1,33 +1,34 @@
 package com.gaogroup.mangaoffline.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.Request.Method;
-import com.android.volley.toolbox.StringRequest;
 import com.gaogroup.mangaoffline.AppController;
 import com.gaogroup.mangaoffline.MangaActivity;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class ChapterLoader extends AsyncTask<String, Integer, Void>
+public class ChapterLoader extends AsyncTask<String, Void, Void>
 {    
     public static String BASE_URL = "http://www.mangaeden.com";
 
-    private MangaActivity listener;
+    private MangaActivity activity;
+    private ProgressDialog dialog;
     private String mangaUrl;
+    List<ChapterInfo> items = new ArrayList<ChapterInfo>();
 
-    public ChapterLoader(MangaActivity listener)
+    public ChapterLoader(MangaActivity activity, String mangaUrl)
     {
-        this.listener = listener;        
+        this.activity = activity;     
+        this.mangaUrl = mangaUrl;
     }
     
     @Override
@@ -35,44 +36,25 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
     {
         try
         {
-            this.mangaUrl = params[0];
-            executeVolley(params[0]);
+            parseHtml(params[0]);
+            getMoreItem();
         }
         catch(Exception ex)
-        {   
-            listener.closeProgressDialog();
-        	Log.e("chapterloader", "Error to connect network!");        
+        {
+        	Log.e("chapterloader", "Boc tach chapter loi");        
         }
 
         return null;
     }
     
-    public void executeVolley(String url) {
-        
-        if(url != null && !url.equals("")) {
-            
-            StringRequest strReq = new StringRequest(Method.GET, url, new Response.Listener<String>() {
+    @Override
+    protected void onPreExecute() {
+        dialog = activity.getMangaDialog();
+    }
     
-                @Override
-                public void onResponse(String response) {
-                    parseHtml(response);
-                    getMoreItem();
-                    listener.finishLoading();
-                }
-            }, new Response.ErrorListener() {
-    
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    listener.closeProgressDialog();
-                    Log.e("chapterloader", "Error to connect network!");          
-                }
-            });
-    
-            // Adding request to request queue
-            AppController.getInstance().addToRequestQueue(strReq, "req_chapter_list");
-        } else {
-            listener.finishLoading();
-        }
+    @Override
+    protected void onPostExecute(Void result) {
+        activity.closeProgressDialog(dialog);
     }
     
     private Document doc;
@@ -81,8 +63,7 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
     
     public void parseHtml(String html) {
         doc = Jsoup.parse(html);
-        content = doc.select("#leftContent > table > tbody").get(0);      
-//        Log.e("chapterloader", content.html());     
+        content = doc.select("#leftContent > table > tbody").get(0);       
         elements = content.select("tr");
     }
     
@@ -103,12 +84,12 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
                 if(existInfo == null) AppController.getInstance().getDBHelper().createChapter(item);
                 else item = existInfo;
                 
-                listener.loadChapter(item); 
-                listener.updateProgressBar((int) (number * 100 / elements.size()));
+                items.add(0, item);
                 number ++;
             }
         }
 
+        activity.loadChapter(items); 
     }
 
     private ChapterInfo getItem(Element e)

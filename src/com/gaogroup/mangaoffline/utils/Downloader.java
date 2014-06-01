@@ -25,6 +25,7 @@ import com.gaogroup.mangaoffline.MangaActivity;
 import com.gaogroup.mangaoffline.ViewActivity;
 import com.gaogroup.mangaoffline.model.ViewItem;
 import com.gaogroup.mangaoffline.utils.ViewController.ViewChangeListener;
+import com.google.android.gms.drive.internal.ac;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.download.HttpClientImageDownloader;
 
@@ -49,13 +50,13 @@ public class Downloader extends AsyncTask<String, Void, Integer> {
     protected Integer doInBackground(String... params) {
         try
         {
-            activity.showProgressDialog();
+            activity.showProgressDialog(activity.getDownloadDialog());
             chapterUrl = params[0];
             executeVolley(chapterUrl);
         }
         catch(Exception ex)
         {     
-            activity.closeProgressDialog();
+            activity.closeProgressDialog(activity.getDownloadDialog());
             Log.e("chapterloader", "Error to connect network!");    
         }
         return 0;
@@ -101,7 +102,7 @@ public class Downloader extends AsyncTask<String, Void, Integer> {
         long total = 0;
         while (true) {
             int count = is.read(bytes, 0, FileUtils.BUFFER_SIZE);
-            activity.updateProgress((int)((total*100)/lenghtOfFile));
+            activity.getDownloadDialog().setProgress((int)((total*100)/lenghtOfFile));
             if (count == -1) {
                 break;
             }
@@ -151,7 +152,7 @@ public class Downloader extends AsyncTask<String, Void, Integer> {
         {
             if(this.mCount == 0 || this.mCount == mTotal) return;
             
-            activity.updateProgressMessage("Downloading " + (mCount + 1) + "/" + mTotal);
+            activity.getDownloadDialog().setTitle("Downloading " + (mCount + 1) + "/" + mTotal);
             Element e = mIterator.next();
             
             String sourceUrl = e.attr("value");      
@@ -197,7 +198,7 @@ public class Downloader extends AsyncTask<String, Void, Integer> {
             AppController.getInstance().addToRequestQueue(strReq, "req_view_item");
             this.mCount ++;
         } else {
-            activity.closeProgressDialog();
+            activity.closeProgressDialog(activity.getDownloadDialog());
         }
     }
 

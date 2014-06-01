@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class ChapterAdapter extends BaseAdapter {
@@ -54,12 +53,6 @@ public class ChapterAdapter extends BaseAdapter {
 
 		notifyDataSetChanged();
 	}
-	
-	public void addItem(ChapterInfo add) {
-            
-        this.items.add(add);
-
-    }
 
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -70,7 +63,7 @@ public class ChapterAdapter extends BaseAdapter {
             convertView = infalter.inflate(R.layout.chapter_list_item, null);
 
             holder = new ViewHolder();
-            holder.button = (Button) convertView.findViewById(R.id.buttonView);
+            holder.button = (TextView) convertView.findViewById(R.id.buttonView);
             holder.name = (TextView) convertView.findViewById(R.id.textView);
             holder.sub = (TextView) convertView.findViewById(R.id.subTextView);
             
@@ -118,7 +111,7 @@ public class ChapterAdapter extends BaseAdapter {
     public static class ViewHolder {
         public TextView name;
         public TextView sub;
-        public Button button;
+        public TextView button;
     }
 
 	public void clear() {

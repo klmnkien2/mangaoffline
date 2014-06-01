@@ -3,6 +3,10 @@ package com.gaogroup.mangaoffline;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.Request.Method;
+import com.android.volley.toolbox.StringRequest;
 import com.crittercism.app.Crittercism;
 import com.gaogroup.mangaoffline.R;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
@@ -11,6 +15,7 @@ import com.gaogroup.mangaoffline.utils.ChapterLoader;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -23,6 +28,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
@@ -48,6 +54,7 @@ public class MangaActivity extends ActionBarActivity {
         
         initImageLoader();        
         admob();
+        admobInterstitialAd();
         
         setupMangaInfo();
         setupListChapters();
@@ -118,22 +125,12 @@ public class MangaActivity extends ActionBarActivity {
         }
     }
     
-    public void setupButtonFunc() {
-//        Button download = (Button) findViewById(R.id.button_download);
-//        download.setOnClickListener(new View.OnClickListener() {
-//            
-//            @Override
-//            public void onClick(View v) {
-//                
-//            }
-//        });
-        
+    public void setupButtonFunc() {        
         Button refesh = (Button) findViewById(R.id.button_refesh);
         refesh.setOnClickListener(new View.OnClickListener() {
             
             @Override
             public void onClick(View v) {
-                listAdapter.clear();
                 getChapterList(mangaInfo.getMangaUrl());
             }
         });
@@ -184,10 +181,32 @@ public class MangaActivity extends ActionBarActivity {
      * Admob coding block
      */
     private AdView adView;
+    private InterstitialAd interstitial;
+    private void admobInterstitialAd() {
+        // Create the interstitial.
+        interstitial = new InterstitialAd(this);
+        interstitial.setAdUnitId("ca-app-pub-1749468049809468/2224857037");
+
+        // Create ad request.
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        // Begin loading your interstitial.
+        interstitial.loadAd(adRequest);
+    }
     
     @Override
     public void onBackPressed() {
-    	confirmMessage("Confirm", "Do you really want to quit?");
+        if (interstitial.isLoaded()) {
+            interstitial.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    confirmMessage("Confirm", "Do you really want to quit?");
+                }
+            });
+            interstitial.show();
+        } else {        
+            confirmMessage("Confirm", "Do you really want to quit?");
+        }
     }
 
     @Override
@@ -231,62 +250,68 @@ public class MangaActivity extends ActionBarActivity {
         adView.loadAd(adRequest);
     }
     
-    public void loadChapter(ChapterInfo item) {        
-        listAdapter.addItem(item);        
-    }
-    
-    public void updateProgressBar(int value) {
-        dialog.setProgress(value);
-    }
-    
-    public void updateProgressMessage(String value) {
-        dialog.setMessage(value);
-    }
-    
-    public void finishLoading() {
-        listAdapter.notifyDataSetChanged();
-        closeProgressDialog();
-    }
-    
-    public void getChapterList(String url)
-    {
+    public void loadChapter(List<ChapterInfo> items) {        
         listAdapter.clear();
-        showProgressDialog();
-        new ChapterLoader(this).execute(url);
+        listAdapter.addAll(items);        
+    }
+    
+    public void getChapterList(final String url)
+    {  
+        showProgressDialog(mangaDialog);
+        StringRequest strReq = new StringRequest(Method.GET, url, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {                
+                new ChapterLoader(MangaActivity.this, url).execute(response);
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                closeProgressDialog(mangaDialog);
+                Log.e("chapterloader", "Error to connect network!");          
+            }
+        });
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, "req_chapter_list");
     }
     
     public void downloadChapter(String url)
     {
         listAdapter.clear();
-        showProgressDialog();
     }
     
     /*
      * Setup a progresDialog
      */
-    private ProgressDialog dialog;
+    private ProgressDialog downloadDialog;
+    private ProgressDialog mangaDialog;
     
     public void setupProgressDialog() {
-    	dialog = new ProgressDialog(this);
-    	dialog.setTitle("In progress...");
-		dialog.setMessage("Loading...");
-		dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		dialog.setIndeterminate(false);   
-		dialog.setMax(100);
-//		dialog.setIcon(R.drawable.arrow_stop_down);
-		dialog.setCancelable(true);
+    	downloadDialog = new ProgressDialog(this);
+    	downloadDialog.setTitle("In progress...");
+		downloadDialog.setMessage("Loading...");
+		downloadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		downloadDialog.setIndeterminate(false);   
+		downloadDialog.setMax(100);
+		downloadDialog.setCancelable(true);
+		
+		mangaDialog = new ProgressDialog(this);
+		mangaDialog.setTitle("Message");
+		mangaDialog.setMessage("Loading...");
+		mangaDialog.setCancelable(true);
     }
     
-    public void progressReset() {
-        dialog.setMessage("Loading...");
-        dialog.setProgress(0);
+    public ProgressDialog getDownloadDialog() {
+        return downloadDialog;
     }
     
-    public void updateProgress(int percent) {
-    	dialog.setProgress(percent);
+    public ProgressDialog getMangaDialog() {
+        return mangaDialog;
     }
     
-    public void showProgressDialog() {
+    public void showProgressDialog(ProgressDialog dialog) {
         if (dialog!=null) {
             if (!dialog.isShowing()) {
                 dialog.show();
@@ -294,7 +319,7 @@ public class MangaActivity extends ActionBarActivity {
         }
     }
     
-    public void closeProgressDialog() {
+    public void closeProgressDialog(ProgressDialog dialog) {
         if (dialog!=null) {
             if (dialog.isShowing()) {
                 dialog.dismiss();
@@ -310,7 +335,7 @@ public class MangaActivity extends ActionBarActivity {
 
         confirm.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(DialogInterface downloadDialog, int which) {
 
                 System.exit(0);
             }

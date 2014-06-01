@@ -33,16 +33,14 @@
                 android:textColor="#000000"
                 android:textSize="@dimen/list_sub_text_size" />
 
-            <Button
+            <TextView
                 android:id="@+id/buttonView"
-                android:background="@drawable/btn_blue_matte"
-                android:padding="2dip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Download"
-                android:textSize="@dimen/small_text_size" 
-                android:textColor="#000000" />
+                android:text=" [ Download ] "
+                android:textSize="@dimen/list_sub_text_size" 
+                android:textStyle="italic"
+                android:textColor="#f00" />
         </LinearLayout>
     </LinearLayout>
 

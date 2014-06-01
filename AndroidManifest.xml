@@ -40,7 +40,6 @@
         <activity
             android:name="com.gaogroup.mangaoffline.ViewActivity"
             android:label="@string/nav_back" 
-            android:noHistory="true"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
