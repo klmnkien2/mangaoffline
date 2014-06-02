@@ -110,7 +110,11 @@ public class MangaActivity extends ActionBarActivity {
     public void getChapterData() {
         List<ChapterInfo> lst = AppController.getInstance().getDBHelper().getAllChapters();
         if(lst.isEmpty()) {
-            getChapterList(mangaInfo.getMangaUrl());
+            List<ChapterInfo> lstChapter = AppController.getListChapters();
+            for (ChapterInfo info : lstChapter) {
+                AppController.getInstance().getDBHelper().createChapter(info);
+            }
+            listAdapter.addAll(lstChapter);
         } else {
             List<ChapterInfo> lstChapter = new ArrayList<ChapterInfo>();
             for (ChapterInfo info : lst) {
@@ -166,12 +170,12 @@ public class MangaActivity extends ActionBarActivity {
     	TextView description = (TextView) findViewById(R.id.description_info);
     	if(tag.equals("expand")) {
     		description.setVisibility(View.GONE);
-    		findViewById(R.id.button_refesh).setVisibility(View.GONE);
+    		findViewById(R.id.main_info).setVisibility(View.GONE);
     		link.setTag("collapse");
     		link.setText("TAP TO EXPAND");
     	} else {
     		description.setVisibility(View.VISIBLE);
-    		findViewById(R.id.button_refesh).setVisibility(View.VISIBLE);
+    		findViewById(R.id.main_info).setVisibility(View.VISIBLE);
     		link.setTag("expand");
     		link.setText("TAP TO COLLAPSE");
     	}
@@ -279,7 +283,7 @@ public class MangaActivity extends ActionBarActivity {
     
     public void downloadChapter(String url)
     {
-        listAdapter.clear();
+        
     }
     
     /*

@@ -18,6 +18,7 @@
     
     <dimen name="small_text_size">8dip</dimen>
     <dimen name="link_collapse_text_size">12dip</dimen>
+    <dimen name="link_collapse_pad_top">6dip</dimen>
     <dimen name="link_collapse_text_margin">9dip</dimen> <!-- size / 2 + margin -->
     
     <dimen name="sliding_tab_height">55dip</dimen>
