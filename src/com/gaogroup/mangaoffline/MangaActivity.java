@@ -12,6 +12,8 @@ import com.gaogroup.mangaoffline.R;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 import com.gaogroup.mangaoffline.model.MangaInfo;
 import com.gaogroup.mangaoffline.utils.ChapterLoader;
+import com.gaogroup.mangaoffline.utils.ChapterParser;
+import com.gaogroup.mangaoffline.utils.Downloader;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -283,7 +285,22 @@ public class MangaActivity extends ActionBarActivity {
     
     public void downloadChapter(String url)
     {
-        
+        ChapterParser parser = new ChapterParser(this);
+        parser.execute(url);
+    }
+    
+    public void downloadImageLinks(ArrayList<String> links)
+    {
+        new Downloader(this, links).execute();
+    }
+    
+    public void updateDownloadProgress(int value) {
+        getDownloadDialog().setProgress(value);
+    }
+    
+    public void startDownloading(String message) {
+        getDownloadDialog().setProgress(0);
+        getDownloadDialog().setMessage(message);
     }
     
     /*
@@ -346,6 +363,23 @@ public class MangaActivity extends ActionBarActivity {
         });
         
         confirm.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+
+        confirm.show().show();
+    }
+    
+    public void displayAlert(String title, String message) {
+
+        AlertDialog.Builder confirm = new AlertDialog.Builder(this);
+        confirm.setTitle(title);
+        confirm.setMessage(message);
+
+        confirm.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
