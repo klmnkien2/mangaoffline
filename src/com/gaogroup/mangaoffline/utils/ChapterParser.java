@@ -14,9 +14,12 @@ import com.android.volley.Request.Method;
 import com.android.volley.toolbox.StringRequest;
 import com.gaogroup.mangaoffline.AppController;
 import com.gaogroup.mangaoffline.MangaActivity;
-import com.gaogroup.mangaoffline.model.ViewItem;
+import com.gaogroup.mangaoffline.model.ChapterInfo;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class ChapterParser {
     
@@ -26,18 +29,29 @@ public class ChapterParser {
     private String chapterUrl;
     private int mTotal;
     private int mCount;
+    private ChapterInfo info;
     private ArrayList<String> links = new ArrayList<>(); 
 
-    public ChapterParser(MangaActivity activity) {
+    public ChapterParser(MangaActivity activity, ChapterInfo info) {
         this.activity = activity;
+        this.info = info;
         this.mTotal = 0;
         this.mCount = 0;
     }
 
     public void execute(String url) {
-        activity.getDownloadDialog().setMessage("Loading image links ...");
-        activity.getDownloadDialog().setProgress(0);
-        activity.showProgressDialog(activity.getDownloadDialog());
+        info.setProgress(0);
+        ProgressBar bar = info.getProgressBar();
+        if(bar != null) {
+          bar.setProgress(info.getProgress());
+          bar.invalidate();
+        }
+        
+        TextView text = info.getProgressText();
+        if(text != null) {
+            text.setText("Loading image links...");
+            text.invalidate();
+        }
         
         chapterUrl = url;
         StringRequest strReq = new StringRequest(Method.GET, url, new Response.Listener<String>() {
@@ -51,7 +65,17 @@ public class ChapterParser {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                activity.closeProgressDialog(activity.getDownloadDialog());
+                ProgressBar bar = info.getProgressBar();
+                if(bar != null) {
+                  bar.setVisibility(View.GONE);
+                  bar.invalidate();
+                }
+                
+                TextView text = info.getProgressText();
+                if(text != null) {
+                    text.setVisibility(View.GONE);
+                    text.invalidate();
+                }
                 activity.displayAlert("Message", "Image links loaded unsuccessfullly");
             }
         });
@@ -82,7 +106,12 @@ public class ChapterParser {
 
             Element e = mIterator.next();
             this.mCount ++;
-            activity.getDownloadDialog().setProgress(this.mCount * 100 / this.mTotal);
+            
+            ProgressBar bar = info.getProgressBar();
+            if(bar != null) {
+              bar.setProgress(this.mCount * 100 / this.mTotal);
+              bar.invalidate();
+            }
 
             if(this.mCount > 1 && this.mCount < elements.size() - 1) {
                 
@@ -101,15 +130,7 @@ public class ChapterParser {
                                 imageUrl = "http:" + imageUrl;
                             }
 
-                            links.add(imageUrl);                            
-                            
-                            ViewItem exist = AppController.getInstance().getDBHelper().getPage(imageUrl);
-                            if(exist == null) {
-                                ViewItem item = new ViewItem(imageUrl);
-                                item.setOrder(mCount);
-                                item.setChapterUrl(chapterUrl);
-                                AppController.getInstance().getDBHelper().createPage(item);
-                            }
+                            links.add(imageUrl);   
                             
                         } catch(Exception e) {
                             Log.e("oh yeah", "Parser loi link stt : " + mCount);  
@@ -134,7 +155,7 @@ public class ChapterParser {
             }
             
         } else {
-            activity.downloadImageLinks(links);
+//            activity.downloadImageLinks(links, listPos);
         }
     }
 

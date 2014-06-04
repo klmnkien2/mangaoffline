@@ -20,28 +20,40 @@
             android:textSize="@dimen/list_name_text_size"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/subTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="@dimen/list_sub_text_size" />
+
+        <ProgressBar
+            android:id="@+id/downloadProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_marginTop="5dip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal" >
+            android:indeterminate="false"
+            android:max="100" 
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/subTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#000000"
-                android:textSize="@dimen/list_sub_text_size" />
-
-            <TextView
-                android:id="@+id/buttonView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" [ Download ] "
-                android:textSize="@dimen/list_sub_text_size" 
-                android:textStyle="italic"
-                android:textColor="#f00" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/downloadProgressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#f00"
+            android:textSize="@dimen/list_sub_text_size"
+            android:textStyle="italic" 
+            android:visibility="gone" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/buttonView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dip"
+        android:layout_alignParentRight="true"        
+        android:layout_centerVertical="true"
+        android:src="@drawable/download" />
 
 </RelativeLayout>

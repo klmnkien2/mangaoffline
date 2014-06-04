@@ -19,31 +19,41 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.download.HttpClientImageDownloader;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class Downloader extends AsyncTask<Void, Integer, Void> {
     
     public static String BASE_URL = "http://www.mangaeden.com";
 
     private MangaActivity activity;
+    private int listPos;
+    private String chapterUrl;
     private ArrayList<String> links = new ArrayList<>(); 
 
-    public Downloader(MangaActivity activity, ArrayList<String> links) {
+    public Downloader(MangaActivity activity, int listPos, ArrayList<String> links, String chapterUrl) {
         this.activity = activity;
+        this.listPos = listPos;
         this.links = links;
+        this.chapterUrl = chapterUrl;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
+        publishProgress(0, 0);
         for(int i=0; i < links.size(); i++) {
-//            activity.startDownloading("Downloading file " + (i+1) + "/" + links.size());
+            publishProgress(-1, i+1, links.size());
             
             String fileUrl = downloadUrl(links.get(i));
             if(fileUrl != null) {
                 ViewItem exist = AppController.getInstance().getDBHelper().getPage(links.get(i));
                 if(exist != null) {
-                    exist.setFileUrl(fileUrl);
+                    exist.setFileUrl("file://" + fileUrl);
                     AppController.getInstance().getDBHelper().updatePage(exist);
+                } else {
+                    ViewItem item = new ViewItem(links.get(i));
+                    item.setOrder(i);
+                    item.setChapterUrl(chapterUrl);
+                    item.setFileUrl("file://" + fileUrl);
+                    AppController.getInstance().getDBHelper().createPage(item);
                 }
             }
             
@@ -55,18 +65,22 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
     @Override
     protected void onProgressUpdate(Integer... values)
     {
-        activity.updateDownloadProgress(values[0].intValue());
+        if(values[0].intValue() == 0) { 
+            activity.updateDownloadProgress(listPos, values[0].intValue());
+        } else if(values[0].intValue() == -1) { 
+            activity.updateDownloadProgress(listPos, 0);
+            activity.updateDownloadText(listPos, "Downloading " + values[1].intValue() + "/" + values[2].intValue());
+        }
     }
     
     @Override
     protected void onPostExecute(Void voids) {
-        activity.closeProgressDialog(activity.getDownloadDialog());
+        activity.closeDownloadProgress(listPos);
     }
     
     public String downloadUrl(String imageUrl) {
         File fileForImage = new File(FileUtils.getSaveDir(activity), FileUtils.getImageNameFromUrl(imageUrl));
-
-        Log.e("filename", fileForImage.getAbsolutePath());
+     
         try {
             
             URL url = new URL(imageUrl);
@@ -99,11 +113,10 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
     }
     
     public void copyStream(InputStream is, OutputStream os, int lenghtOfFile) throws IOException {
+        
         byte[] bytes = new byte[FileUtils.BUFFER_SIZE];
-        long total = 0;
         while (true) {
-            int count = is.read(bytes, 0, FileUtils.BUFFER_SIZE);
-            publishProgress((int)((total*100)/lenghtOfFile));
+            int count = is.read(bytes, 0, FileUtils.BUFFER_SIZE);            
             if (count == -1) {
                 break;
             }

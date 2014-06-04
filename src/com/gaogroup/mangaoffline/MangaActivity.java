@@ -8,6 +8,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.Request.Method;
 import com.android.volley.toolbox.StringRequest;
 import com.crittercism.app.Crittercism;
+import com.gaogroup.mangaoffline.ChapterAdapter.ViewHolder;
 import com.gaogroup.mangaoffline.R;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 import com.gaogroup.mangaoffline.model.MangaInfo;
@@ -283,49 +284,45 @@ public class MangaActivity extends ActionBarActivity {
         AppController.getInstance().addToRequestQueue(strReq, "req_chapter_list");
     }
     
-    public void downloadChapter(String url)
+    public void downloadChapter(int pos)
     {
-        ChapterParser parser = new ChapterParser(this);
-        parser.execute(url);
+        ChapterParser parser = new ChapterParser(this, listAdapter.getItem(pos));
+        parser.execute(listAdapter.getItem(pos).getChapterUrl());
     }
     
-    public void downloadImageLinks(ArrayList<String> links)
+    public void downloadImageLinks(ArrayList<String> links, int pos)
     {
-        new Downloader(this, links).execute();
+        new Downloader(this, pos, links, listAdapter.getItem(pos).getChapterUrl()).execute();
     }
     
-    public void updateDownloadProgress(int value) {
-        getDownloadDialog().setProgress(value);
+    public void updateDownloadProgress(int listPos, int value) {
+        ViewHolder holder = (ViewHolder)listView.getChildAt(listPos).getTag();
+        holder.progressBar.setProgress(value);
     }
     
-    public void startDownloading(String message) {
-        getDownloadDialog().setProgress(0);
-        getDownloadDialog().setMessage(message);
+    public void updateDownloadText(int listPos, String text) {
+        ViewHolder holder = (ViewHolder)listView.getChildAt(listPos).getTag();
+        holder.progressText.setText(text);
+    }
+    
+    public void closeDownloadProgress(int listPos) {
+        ViewHolder holder = (ViewHolder)listView.getChildAt(listPos).getTag();
+        holder.progressBar.setVisibility(View.GONE);
+        holder.progressText.setVisibility(View.GONE);
+        holder.button.setVisibility(View.VISIBLE);
     }
     
     /*
      * Setup a progresDialog
      */
-    private ProgressDialog downloadDialog;
     private ProgressDialog mangaDialog;
     
     public void setupProgressDialog() {
-    	downloadDialog = new ProgressDialog(this);
-    	downloadDialog.setTitle("In progress...");
-		downloadDialog.setMessage("Loading...");
-		downloadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		downloadDialog.setIndeterminate(false);   
-		downloadDialog.setMax(100);
-		downloadDialog.setCancelable(true);
 		
 		mangaDialog = new ProgressDialog(this);
 		mangaDialog.setTitle("Message");
 		mangaDialog.setMessage("Loading...");
 		mangaDialog.setCancelable(true);
-    }
-    
-    public ProgressDialog getDownloadDialog() {
-        return downloadDialog;
     }
     
     public ProgressDialog getMangaDialog() {

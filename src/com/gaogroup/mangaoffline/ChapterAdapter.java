@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class ChapterAdapter extends BaseAdapter {
@@ -20,6 +22,15 @@ public class ChapterAdapter extends BaseAdapter {
 	private Context mContext;
 	private LayoutInflater infalter;
 	private ArrayList<ChapterInfo> items = new ArrayList<ChapterInfo>();
+
+    public static class ViewHolder {
+        public TextView name;
+        public TextView sub;
+        public ImageView button;
+        public ProgressBar progressBar;
+        public TextView progressText;
+        public ChapterInfo info;
+    }
 
 	public ChapterAdapter(Context c) {
 		infalter = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -57,26 +68,44 @@ public class ChapterAdapter extends BaseAdapter {
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) {
         
-        ViewHolder holder;
+        final ViewHolder holder;
+        final ChapterInfo info = getItem(position);
 
         if (convertView == null) {
             convertView = infalter.inflate(R.layout.chapter_list_item, null);
 
             holder = new ViewHolder();
-            holder.button = (TextView) convertView.findViewById(R.id.buttonView);
+            holder.button = (ImageView) convertView.findViewById(R.id.buttonView);
+            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.downloadProgressBar);
+            holder.progressText = (TextView) convertView.findViewById(R.id.downloadProgressText);
             holder.name = (TextView) convertView.findViewById(R.id.textView);
             holder.sub = (TextView) convertView.findViewById(R.id.subTextView);
+            holder.info = info;
             
             convertView.setTag(holder);
-        } else
+        } else {
             holder = (ViewHolder) convertView.getTag();
+            
+            holder.info.setProgressBar(null);
+            holder.info.setProgressText(null);
+            holder.info = info;
+            holder.info.setProgressBar(holder.progressBar);
+            holder.info.setProgressText(holder.progressText);
+        }
+        
+        holder.progressBar.setProgress(info.getProgress());
+        info.setProgressBar(holder.progressBar);
+        info.setProgressText(holder.progressText);
         
         final int pos = position;
         holder.button.setOnClickListener(new View.OnClickListener() {
             
             @Override
             public void onClick(View v) {
-                ((MangaActivity)mContext).downloadChapter(items.get(pos).getChapterUrl());
+                holder.button.setVisibility(View.GONE);
+                holder.progressBar.setVisibility(View.VISIBLE);
+                holder.progressText.setVisibility(View.VISIBLE);
+                ((MangaActivity)mContext).downloadChapter(pos);
             }
         });
         holder.name.setText(items.get(position).getTitle());
@@ -106,12 +135,6 @@ public class ChapterAdapter extends BaseAdapter {
             i.putExtra("CHAPTER_URL", url);      
             mContext.startActivity(i); 
         }
-    }
-
-    public static class ViewHolder {
-        public TextView name;
-        public TextView sub;
-        public TextView button;
     }
 
 	public void clear() {

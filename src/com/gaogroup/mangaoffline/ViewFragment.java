@@ -8,6 +8,7 @@ import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,7 @@ public class ViewFragment extends Fragment {
         Bundle args = new Bundle();
         args.putString("title", gag.getTitle());
         args.putString("imageUrl", gag.getImageUrl());
-        args.putString("fileUrl", gag.getFileUrl());
+        args.putString("fileUrl", gag.getFileUrl());        
         args.putBoolean("isLoadingOnly", gag.isLoadingOnly());
         args.putBoolean("networkTrouble", gag.isNetworkTrouble());
         fragment.setArguments(args);
@@ -87,6 +88,7 @@ public class ViewFragment extends Fragment {
     
     public void loadImage() {
         final String urlToLoad = fileUrl != null ? fileUrl : imageUrl;
+        Log.e("getFileUrl", urlToLoad);
         mImageLoader.displayImage(urlToLoad, mImageView, new ImageLoadingListener() {
 
             @Override

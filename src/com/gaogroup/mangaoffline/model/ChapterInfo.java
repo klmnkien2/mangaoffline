@@ -1,5 +1,8 @@
 package com.gaogroup.mangaoffline.model;
 
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 public class ChapterInfo
 {
     private String mangaUrl;
@@ -8,7 +11,11 @@ public class ChapterInfo
     private String sub;
     private int isRead;
     private int number;
-    
+
+    private volatile TextView mProgressText;
+    private volatile Integer mProgress;
+    private volatile ProgressBar mProgressBar;
+
     public ChapterInfo(String mangaUrl, String chapterUrl, String title, String sub, int isRead, int number) {
         super();
         this.mangaUrl = mangaUrl;
@@ -17,6 +24,10 @@ public class ChapterInfo
         this.sub = sub;
         this.isRead = isRead;
         this.number = number;
+
+        mProgress = 0;
+        mProgressText = null;
+        mProgressBar = null;
     }
     public String getMangaUrl() {
         return mangaUrl;
@@ -53,6 +64,24 @@ public class ChapterInfo
     }
     public void setNumber(int number) {
         this.number = number;
+    }
+    public TextView getProgressText() {
+        return mProgressText;
+    }
+    public void setProgressText(TextView mProgressText) {
+        this.mProgressText = mProgressText;
+    }
+    public Integer getProgress() {
+        return mProgress;
+    }
+    public void setProgress(Integer mProgress) {
+        this.mProgress = mProgress;
+    }
+    public ProgressBar getProgressBar() {
+        return mProgressBar;
+    }
+    public void setProgressBar(ProgressBar mProgressBar) {
+        this.mProgressBar = mProgressBar;
     }    
-    
+
 }

@@ -92,6 +92,7 @@ public class AppController extends Application {
     public static List<ChapterInfo> getListChapters() {
         if(listChapters == null) {
             listChapters = new ArrayList<>();
+            /*
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/0/1/", "Naruto 0 ", "Apr 5, 2007", -1, 0));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/1/1/", "Naruto 1 ", "Jun 5, 2010", -1, 1));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/2/1/", "Naruto 2 ", "Jun 5, 2010", -1, 2));
@@ -829,7 +830,7 @@ public class AppController extends Application {
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/671.5/1/", "Naruto 671.5: 671 colored ", "May 9, 2014", -1, 734));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/672/1/", "Naruto 672: Night Guy...!! ", "Apr 9, 2014", -1, 735));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/672.5/1/", "Naruto 672.5: 672 colored ", "May 9, 2014", -1, 736));
-            listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/673/1/", "Naruto 673: We will...!! ", "Apr 16, 2014", -1, 737));
+            */listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/673/1/", "Naruto 673: We will...!! ", "Apr 16, 2014", -1, 737));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/673.5/1/", "Naruto 673.5: 673 colored ", "May 9, 2014", -1, 738));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/674/1/", "Naruto 674: Sasuke's Rinnegan...!! ", "Apr 23, 2014", -1, 739));
             listChapters.add(new ChapterInfo(manga.getMangaUrl(), "http://www.mangaeden.com/en-manga/naruto/674.5/1/", "Naruto 674.5: 674 colored ", "May 9, 2014", -1, 740));
