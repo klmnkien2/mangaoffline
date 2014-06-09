@@ -29,11 +29,10 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.SparseArray;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 import android.graphics.Bitmap;
 
 public class ViewActivity extends ActionBarActivity implements ViewChangeListener {
@@ -53,8 +52,9 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         dbHelper = AppController.getInstance().getDBHelper();
         Crittercism.initialize(getApplicationContext(), "5266204c558d6a630500000c"); 
         setContentView(R.layout.activity_view);
+        getSupportActionBar().hide(); 
         
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setupButtonFunc();
         addAds();     
         
         initImageLoader();
@@ -73,43 +73,45 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         mViewPager.setAdapter(mViewPagerAdapter);
         mViewPager.setOnPageChangeListener(mViewPagerAdapter);        
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_view, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
     
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) 
+    public void setupButtonFunc() 
     {
-        switch (item.getItemId()) 
-        {
-        case android.R.id.home: 
-            NavUtils.navigateUpFromSameTask(this);
-            break;
-            
-        case R.id.action_prev:
-            prev();  
-            return true;
-            
-        case R.id.action_refesh:
-            ViewFragment view = (ViewFragment)mViewPagerAdapter.getRegisteredFragment(mViewPagerAdapter.selectedItem);
-            if(!view.isLoadingOnly) {
-                view.loadImage();
-            }
-            return true;
-            
-        case R.id.action_next:
-            next();  
-            return true;
+        findViewById(R.id.buttonBack).setOnClickListener(new View.OnClickListener() {
 
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-        return true;
-    }
+            @Override
+            public void onClick(View v) {
+                NavUtils.navigateUpFromSameTask(ViewActivity.this);
+            }
+        });
+        
+        findViewById(R.id.buttonPrevious).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                prev();  
+            }
+        });
+        
+        findViewById(R.id.buttonRefesh).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                ViewFragment view = (ViewFragment)mViewPagerAdapter.getRegisteredFragment(mViewPagerAdapter.selectedItem);
+                if(!view.isLoadingOnly) {
+                    view.loadImage();
+                }
+            }
+        });
+        
+        findViewById(R.id.buttonNext).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                next();  
+            }
+        });       
+        
+    }    
     
     private ImageLoader imageLoader;
     public ImageLoader getImageLoader() {
@@ -135,7 +137,7 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
     }
 
     public void refesh() {
-        getSupportActionBar().setTitle("Chapter " + (current_chapter.getNumber() + 1));
+        ((TextView)findViewById(R.id.headerText)).setText(current_chapter.getTitle());
         mViewPagerAdapter.resetItems();
         
         List<ViewItem> lst = dbHelper.getPageInChapter(current_chapter.getChapterUrl());
@@ -145,6 +147,9 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
             mViewPagerAdapter.addLoadingOnly();
             mViewPagerAdapter.addMoreItems(lst, lst.size());
             mViewPagerAdapter.finishLoading();
+            
+            current_chapter.setIsRead(1);
+            dbHelper.updateChapter(current_chapter);
         }
         
     }
@@ -400,7 +405,8 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
     public void onViewLoaded(ViewItem viewItems, int total) {
         mViewPagerAdapter.addMoreItem(viewItems, total);
         if(current_chapter != null) {
-            dbHelper.readChapter(current_chapter);
+            current_chapter.setIsRead(1);
+            dbHelper.updateChapter(current_chapter);
         }
         
         ViewItem exist = AppController.getInstance().getDBHelper().getPage(viewItems.getImageUrl());

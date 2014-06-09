@@ -22,7 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class ChapterParser {
-    
+
     public static String BASE_URL = "http://www.mangaeden.com";
 
     private MangaActivity activity;
@@ -40,19 +40,8 @@ public class ChapterParser {
     }
 
     public void execute(String url) {
-        info.setProgress(0);
-        ProgressBar bar = info.getProgressBar();
-        if(bar != null) {
-          bar.setProgress(info.getProgress());
-          bar.invalidate();
-        }
-        
-        TextView text = info.getProgressText();
-        if(text != null) {
-            text.setText("Loading image links...");
-            text.invalidate();
-        }
-        
+        updateProgress(0);
+
         chapterUrl = url;
         StringRequest strReq = new StringRequest(Method.GET, url, new Response.Listener<String>() {
 
@@ -65,17 +54,17 @@ public class ChapterParser {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                info.setDownloading(false);
                 ProgressBar bar = info.getProgressBar();
-                if(bar != null) {
-                  bar.setVisibility(View.GONE);
-                  bar.invalidate();
-                }
-                
                 TextView text = info.getProgressText();
-                if(text != null) {
+                if(bar != null) {
+                    bar.setVisibility(View.GONE);
+                    bar.invalidate();
+                    
                     text.setVisibility(View.GONE);
                     text.invalidate();
                 }
+
                 activity.displayAlert("Message", "Image links loaded unsuccessfullly");
             }
         });
@@ -99,6 +88,19 @@ public class ChapterParser {
         mIterator = elements.iterator();
         parseImageUrl();
     }
+    
+    public void updateProgress(int value) {
+        info.setProgress(value);
+        ProgressBar bar = info.getProgressBar();
+        TextView text = info.getProgressText();
+        if(bar != null) {
+            bar.setProgress(info.getProgress());
+            bar.invalidate();
+            
+            text.setText(info.getProgress() + "/" + bar.getMax());
+            text.invalidate();
+        }
+    }
 
     public void parseImageUrl() {
         if(mIterator.hasNext())
@@ -106,15 +108,10 @@ public class ChapterParser {
 
             Element e = mIterator.next();
             this.mCount ++;
-            
-            ProgressBar bar = info.getProgressBar();
-            if(bar != null) {
-              bar.setProgress(this.mCount * 100 / this.mTotal);
-              bar.invalidate();
-            }
+            updateProgress(this.mCount * 50 / this.mTotal);
 
-            if(this.mCount > 1 && this.mCount < elements.size() - 1) {
-                
+            if(this.mCount > 1 && this.mCount < elements.size()) {
+
                 String sourceUrl = BASE_URL + e.attr("href");   
                 if(this.mCount == 2) sourceUrl = chapterUrl;
 
@@ -131,11 +128,11 @@ public class ChapterParser {
                             }
 
                             links.add(imageUrl);   
-                            
+
                         } catch(Exception e) {
                             Log.e("oh yeah", "Parser loi link stt : " + mCount);  
                         }
-                        
+
                         parseImageUrl();
                     }
                 }, new Response.ErrorListener() {
@@ -153,9 +150,9 @@ public class ChapterParser {
             else {
                 parseImageUrl();
             }
-            
+
         } else {
-//            activity.downloadImageLinks(links, listPos);
+            activity.downloadImageLinks(links, info);
         }
     }
 

@@ -5,22 +5,25 @@ import java.util.List;
 
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class ChapterAdapter extends BaseAdapter {
+public class ChapterAdapter extends ArrayAdapter<ChapterInfo> {
 
 	private Context mContext;
-	private LayoutInflater infalter;
+	private int layoutResourceId;
 	private ArrayList<ChapterInfo> items = new ArrayList<ChapterInfo>();
 
     public static class ViewHolder {
@@ -29,50 +32,30 @@ public class ChapterAdapter extends BaseAdapter {
         public ImageView button;
         public ProgressBar progressBar;
         public TextView progressText;
-        public ChapterInfo info;
     }
 
-	public ChapterAdapter(Context c) {
-		infalter = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	public ChapterAdapter(Context c, int layoutResourceId,  ArrayList<ChapterInfo> items) {
+	    super(c, layoutResourceId, items);
+	    this.items = items;
+		this.layoutResourceId = layoutResourceId;
 		mContext = c;
-	}
-
-	@Override
-	public int getCount() {
-		return items.size();
-	}
-
-	@Override
-	public ChapterInfo getItem(int position) {
-		return items.get(position);
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
-
+	}	
+	
 	public void addAll(List<ChapterInfo> adds) {
-
-		try {
-		    
-            this.items.addAll(adds);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		notifyDataSetChanged();
+	    for (ChapterInfo info : adds) {
+	        add(info);
+	    }
 	}
 
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) {
         
-        final ViewHolder holder;
+        ViewHolder holder;
         final ChapterInfo info = getItem(position);
 
         if (convertView == null) {
-            convertView = infalter.inflate(R.layout.chapter_list_item, null);
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+            convertView = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new ViewHolder();
             holder.button = (ImageView) convertView.findViewById(R.id.buttonView);
@@ -80,43 +63,57 @@ public class ChapterAdapter extends BaseAdapter {
             holder.progressText = (TextView) convertView.findViewById(R.id.downloadProgressText);
             holder.name = (TextView) convertView.findViewById(R.id.textView);
             holder.sub = (TextView) convertView.findViewById(R.id.subTextView);
-            holder.info = info;
             
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
-            
-            holder.info.setProgressBar(null);
-            holder.info.setProgressText(null);
-            holder.info = info;
-            holder.info.setProgressBar(holder.progressBar);
-            holder.info.setProgressText(holder.progressText);
         }
         
         holder.progressBar.setProgress(info.getProgress());
+        holder.progressText.setText(info.getProgress() + "/" + holder.progressBar.getMax());
         info.setProgressBar(holder.progressBar);
+        info.setDownloadButton(holder.button);
         info.setProgressText(holder.progressText);
         
-        final int pos = position;
+        if(info.getDownloaded() == 1) {
+            holder.progressText.setText("Downloaded");
+        }
+        
+        holder.button.setVisibility(info.isDownloading()?View.GONE:View.VISIBLE);
+        holder.progressBar.setVisibility(info.isDownloading()?View.VISIBLE:View.GONE);
+        holder.progressText.setVisibility((info.isDownloading() || info.getDownloaded() == 1)?View.VISIBLE:View.GONE);
+        
+        final ImageView button = holder.button;
+        final ProgressBar progressBar = holder.progressBar;
+        final TextView progressText = holder.progressText;
         holder.button.setOnClickListener(new View.OnClickListener() {
             
             @Override
             public void onClick(View v) {
-                holder.button.setVisibility(View.GONE);
-                holder.progressBar.setVisibility(View.VISIBLE);
-                holder.progressText.setVisibility(View.VISIBLE);
-                ((MangaActivity)mContext).downloadChapter(pos);
+                if(info.getDownloaded() == 1) confirmDownload(info);
+                else {                
+                    button.setVisibility(View.GONE);
+                    button.invalidate();
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.invalidate();
+                    progressText.setVisibility(View.VISIBLE);
+                    progressText.invalidate();
+                    info.setDownloading(true);
+                    
+                    ((MangaActivity)mContext).downloadChapter(info);
+                }
             }
         });
+        
         holder.name.setText(items.get(position).getTitle());
         holder.sub.setText(items.get(position).getSub());
 
-        if(items.get(position).getIsRead() == 1) {
+        if(info.getIsRead() == 1) {
             holder.name.setTypeface(null, Typeface.ITALIC);
             holder.sub.setTypeface(null, Typeface.ITALIC);
         }
        
-        convertView.setOnClickListener(new OnItemClickListener(items.get(position).getChapterUrl()));        
+        convertView.setOnClickListener(new OnItemClickListener(info.getChapterUrl()));        
         
 		return convertView;        
 	}
@@ -136,9 +133,41 @@ public class ChapterAdapter extends BaseAdapter {
             mContext.startActivity(i); 
         }
     }
+    
+    public void confirmDownload(final ChapterInfo info) {
 
+        AlertDialog.Builder confirm = new AlertDialog.Builder(mContext);
+        confirm.setTitle("Confirm");
+        confirm.setMessage("This chapter had downloaded once. Do you really wanna try again?");
+
+        confirm.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface downloadDialog, int which) {
+
+                info.getDownloadButton().setVisibility(View.GONE);
+                info.getDownloadButton().invalidate();
+                info.getProgressBar().setVisibility(View.VISIBLE);
+                info.getProgressBar().invalidate();
+                info.setDownloading(true);
+                
+                ((MangaActivity)mContext).downloadChapter(info);
+            }
+        });
+        
+        confirm.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+
+        confirm.show().show();
+    }
+
+    @Override
 	public void clear() {
-	    items.clear();
+	    super.clear();
 		notifyDataSetChanged();
 	}
 }

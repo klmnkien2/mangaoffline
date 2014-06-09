@@ -3,13 +3,69 @@
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gallery_background" >
+    android:background="@color/listview_background" >
+
+    <RelativeLayout
+        android:id="@+id/header_infomation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="5dip" >
+
+        <ImageView
+            android:id="@+id/buttonBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/back_page" />
+
+        <TextView
+            android:id="@+id/headerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:layout_toRightOf="@+id/buttonBack"
+            android:textColor="#000f63"
+            android:textSize="@dimen/list_name_text_size"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/buttonPrevious"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dip"
+            android:layout_toLeftOf="@+id/buttonRefesh"
+            android:src="@drawable/previous" />
+
+        <ImageView
+            android:id="@+id/buttonRefesh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dip"
+            android:layout_toLeftOf="@+id/buttonNext"
+            android:src="@drawable/refresh" />
+
+        <ImageView
+            android:id="@+id/buttonNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/next" />
+    </RelativeLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/adView" />
+        android:layout_above="@+id/adView"
+        android:layout_below="@+id/header_infomation" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"

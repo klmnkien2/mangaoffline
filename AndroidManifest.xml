@@ -27,7 +27,7 @@
            android:value="@integer/google_play_services_version" />
         
         <activity
-            android:name="com.gaogroup.mangaoffline.MangaActivity"
+            android:name="com.gaogroup.mangaoffline.HomeActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -36,6 +36,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name="com.gaogroup.mangaoffline.MangaActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gaogroup.mangaoffline.HomeActivity" />
+        </activity> 
         
         <activity
             android:name="com.gaogroup.mangaoffline.ViewActivity"

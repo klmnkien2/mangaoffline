@@ -19,7 +19,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	// Database Version
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
 	// Database Name
 	private static final String DATABASE_NAME = AppController.DATABASE_NAME;
@@ -40,6 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + "title  TEXT,"
             + "sub  TEXT,"
             + "isRead  INTEGER,"
+            + "downloaded  INTEGER,"
             + "number  INTEGER,"
             + KEY_CREATED_AT + " DATETIME" + ")";
 	
@@ -80,6 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("title", info.getTitle());
         values.put("sub", info.getSub());
         values.put("isRead", info.getIsRead());
+        values.put("downloaded", info.getIsRead());
         values.put("number", info.getNumber());
 
         // insert row
@@ -88,11 +90,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return inserted_id;
     }
     
-    public int readChapter(ChapterInfo info) {
+    public int updateChapter(ChapterInfo info) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put("isRead", 1);
+        values.put("downloaded", info.getIsRead());
         values.put("mangaUrl", info.getMangaUrl());
         values.put("title", info.getTitle());
         values.put("sub", info.getSub());
@@ -120,6 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getString(c.getColumnIndex("sub")),
                         c.getInt(c.getColumnIndex("isRead")),
                         c.getInt(c.getColumnIndex("number")));
+                info.setDownloaded(c.getInt(c.getColumnIndex("downloaded")));
 
                 return info;
             }
@@ -147,7 +151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getString(c.getColumnIndex("sub")),
                         c.getInt(c.getColumnIndex("isRead")),
                         c.getInt(c.getColumnIndex("number")));
-
+                info.setDownloaded(c.getInt(c.getColumnIndex("downloaded")));
                 return info;
             }
             c.close();
@@ -160,7 +164,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<ChapterInfo> getAllChapters() {
         List<ChapterInfo> list = new ArrayList<ChapterInfo>();
 
-        String selectQuery = "SELECT  * FROM " + TABLE_CHAPTER;
+        String selectQuery = "SELECT  * FROM " + TABLE_CHAPTER + " ORDER BY number ";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
@@ -174,7 +178,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getString(c.getColumnIndex("sub")),
                         c.getInt(c.getColumnIndex("isRead")),
                         c.getInt(c.getColumnIndex("number")));
-                
+                info.setDownloaded(c.getInt(c.getColumnIndex("downloaded")));
                 list.add(info);
             } while (c.moveToNext());
         }

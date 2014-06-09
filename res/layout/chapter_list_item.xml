@@ -36,15 +36,13 @@
             android:indeterminate="false"
             android:max="100" 
             android:visibility="gone" />
-
+        
         <TextView
             android:id="@+id/downloadProgressText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#f00"
-            android:textSize="@dimen/list_sub_text_size"
-            android:textStyle="italic" 
-            android:visibility="gone" />
+            android:textColor="#000000"
+            android:textSize="@dimen/list_sub_text_size_small" />
     </LinearLayout>
 
     <ImageView
@@ -54,6 +52,7 @@
         android:layout_marginRight="10dip"
         android:layout_alignParentRight="true"        
         android:layout_centerVertical="true"
+        android:onClick="myClickHandler"
         android:src="@drawable/download" />
 
 </RelativeLayout>

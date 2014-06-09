@@ -12,22 +12,23 @@ import com.gaogroup.mangaoffline.AppController;
 import com.gaogroup.mangaoffline.MangaActivity;
 import com.gaogroup.mangaoffline.model.ChapterInfo;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class ChapterLoader extends AsyncTask<String, Void, Void>
+public class ChapterLoader extends AsyncTask<String, Integer, Void>
 {    
     public static String BASE_URL = "http://www.mangaeden.com";
 
+    private static int LOAD_ITEM = 1;
+    private static int FINISH_JOB = 2;
+    
     private MangaActivity activity;
-    private ProgressDialog dialog;
     private String mangaUrl;
     List<ChapterInfo> items = new ArrayList<ChapterInfo>();
 
     public ChapterLoader(MangaActivity activity, String mangaUrl)
     {
-        this.activity = activity;     
+        this.activity = activity;
         this.mangaUrl = mangaUrl;
     }
     
@@ -38,23 +39,28 @@ public class ChapterLoader extends AsyncTask<String, Void, Void>
         {
             parseHtml(params[0]);
             getMoreItem();
+            publishProgress(FINISH_JOB);
         }
         catch(Exception ex)
         {
-        	Log.e("chapterloader", "Boc tach chapter loi");        
+        	Log.e("chapterloader", "Boc tach chapter loi"); 
+        	ex.printStackTrace();
         }
 
         return null;
     }
     
     @Override
-    protected void onPreExecute() {
-        dialog = activity.getMangaDialog();
-    }
-    
-    @Override
-    protected void onPostExecute(Void result) {
-        activity.closeProgressDialog(dialog);
+    protected void onProgressUpdate(Integer... values)
+    {
+        if(values[0].intValue() == LOAD_ITEM)
+        {
+            activity.loadChapter(items); 
+        }
+        else if(values[0].intValue() == FINISH_JOB)
+        {
+            activity.closeProgressDialog();
+        } 
     }
     
     private Document doc;
@@ -82,14 +88,17 @@ public class ChapterLoader extends AsyncTask<String, Void, Void>
                 
                 ChapterInfo existInfo = AppController.getInstance().getDBHelper().getChapterByUrl(item.getChapterUrl());
                 if(existInfo == null) AppController.getInstance().getDBHelper().createChapter(item);
-                else item = existInfo;
+                else {
+                    item = existInfo;
+                    AppController.getInstance().getDBHelper().updateChapter(item);
+                }
                 
                 items.add(0, item);
                 number ++;
             }
         }
-
-        activity.loadChapter(items); 
+ 
+        publishProgress(LOAD_ITEM);
     }
 
     private ChapterInfo getItem(Element e)
