@@ -89,7 +89,8 @@ public class ChapterLoader extends AsyncTask<String, Integer, Void>
                 ChapterInfo existInfo = AppController.getInstance().getDBHelper().getChapterByUrl(item.getChapterUrl());
                 if(existInfo == null) AppController.getInstance().getDBHelper().createChapter(item);
                 else {
-                    item = existInfo;
+                    item.setIsRead(existInfo.getIsRead());
+                    item.setDownloaded(existInfo.getDownloaded());
                     AppController.getInstance().getDBHelper().updateChapter(item);
                 }
                 
