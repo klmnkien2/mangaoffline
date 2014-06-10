@@ -83,6 +83,14 @@ public class ChapterAdapter extends ArrayAdapter<ChapterInfo> {
         holder.progressBar.setVisibility(info.isDownloading()?View.VISIBLE:View.GONE);
         holder.progressText.setVisibility((info.isDownloading() || info.getDownloaded() == 1)?View.VISIBLE:View.GONE);
         
+        holder.name.setText(items.get(position).getTitle());
+        holder.sub.setText(items.get(position).getSub());
+
+        if(info.getIsRead() == 1) {
+            holder.name.setTypeface(null, Typeface.ITALIC);
+            holder.sub.setTypeface(null, Typeface.ITALIC);
+        }
+        
         final ImageView button = holder.button;
         final ProgressBar progressBar = holder.progressBar;
         final TextView progressText = holder.progressText;
@@ -104,19 +112,11 @@ public class ChapterAdapter extends ArrayAdapter<ChapterInfo> {
                 }
             }
         });
-        
-        holder.name.setText(items.get(position).getTitle());
-        holder.sub.setText(items.get(position).getSub());
-
-        if(info.getIsRead() == 1) {
-            holder.name.setTypeface(null, Typeface.ITALIC);
-            holder.sub.setTypeface(null, Typeface.ITALIC);
-        }
        
         convertView.setOnClickListener(new OnItemClickListener(info.getChapterUrl()));        
         
-		return convertView;        
-	}
+	return convertView;        
+    }
     
     private class OnItemClickListener implements OnClickListener {
         private String url;
