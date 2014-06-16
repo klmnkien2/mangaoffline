@@ -142,6 +142,9 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         
         List<ViewItem> lst = dbHelper.getPageInChapter(current_chapter.getChapterUrl());
         if(lst.isEmpty()) {
+            mViewController.getViewLinks(current_chapter.getChapterUrl());
+        }
+        else if(current_chapter.getDownloaded() != 1 && lst.size() < current_chapter.getTotalView()) {
         	mViewController.getViewLinks(current_chapter.getChapterUrl());
         } else {            
             mViewPagerAdapter.addLoadingOnly();
@@ -406,6 +409,7 @@ public class ViewActivity extends ActionBarActivity implements ViewChangeListene
         mViewPagerAdapter.addMoreItem(viewItems, total);
         if(current_chapter != null) {
             current_chapter.setIsRead(1);
+            current_chapter.setTotalView(total);
             dbHelper.updateChapter(current_chapter);
         }
         

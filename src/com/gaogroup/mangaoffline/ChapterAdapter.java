@@ -89,6 +89,9 @@ public class ChapterAdapter extends ArrayAdapter<ChapterInfo> {
         if(info.getIsRead() == 1) {
             holder.name.setTypeface(null, Typeface.ITALIC);
             holder.sub.setTypeface(null, Typeface.ITALIC);
+        } else {
+            holder.name.setTypeface(null, Typeface.BOLD);
+            holder.sub.setTypeface(null, Typeface.NORMAL);
         }
         
         final ImageView button = holder.button;

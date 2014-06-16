@@ -78,7 +78,7 @@ public class ViewLoader
             Element e = mIterator.next();
             this.mCount ++;
 
-            if(this.mCount > 1 && this.mCount < elements.size() - 1) {
+            if(this.mCount > 1 && this.mCount < elements.size()) {
                 
                 String sourceUrl = BASE_URL + e.attr("href");   
                 if(this.mCount == 2) sourceUrl = chapterUrl;

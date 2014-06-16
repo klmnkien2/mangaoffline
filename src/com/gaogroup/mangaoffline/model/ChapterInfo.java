@@ -12,6 +12,7 @@ public class ChapterInfo
     private String sub;
     private int isRead;
     private int downloaded;
+    private int totalView;
     private int number;
 
     private volatile boolean isDownloading = false;
@@ -29,6 +30,7 @@ public class ChapterInfo
         this.isRead = isRead;
         this.number = number;
         downloaded = 0;
+        totalView = 0;
 
         mProgress = 0;
         mProgressBar = null;
@@ -104,5 +106,11 @@ public class ChapterInfo
     }
     public void setProgressText(TextView mProgressText) {
         this.mProgressText = mProgressText;
+    }
+    public int getTotalView() {
+        return totalView;
+    }
+    public void setTotalView(int totalView) {
+        this.totalView = totalView;
     }
 }

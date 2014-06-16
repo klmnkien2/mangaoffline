@@ -28,6 +28,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
@@ -259,7 +261,14 @@ public class MangaActivity extends ActionBarActivity {
     
     public void downloadImageLinks(ArrayList<String> links, ChapterInfo info)
     {
-        new Downloader(this, info, links).execute();
+        info.setTotalView(links.size());
+        AppController.getInstance().getDBHelper().updateChapter(info);
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+            new Downloader(this, info, links).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            new Downloader(this, info, links).execute();
+        } 
+        
     }
     
     public void updateDownloadProgress(int listPos, int value) {
